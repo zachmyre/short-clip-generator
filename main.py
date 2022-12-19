@@ -18,7 +18,7 @@ def download_video():
 
     print_step(f"Downloading video source from {url}")
     YouTube(url, on_progress_callback=on_progress).streams.filter(res="1080p").first().download(
-        "assets/videos", filename=f"{'PowerfulJRE'}-{random.randrange(0, 99999)}"
+        "assets/videos", filename=f"{'PowerfulJRE'}-{random.randrange(0, 99999)}.mp4"
     )
     print_substep("")
     print_substep("Background video downloaded successfully! 🎉", style="bold green")
