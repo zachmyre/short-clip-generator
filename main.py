@@ -1,13 +1,13 @@
-#download video
-#clip random part of the video
-#add text on screen
-#render video
+# download video
+# clip random part of the video
+# add text on screen
+# render video
 
 #### ideas ####
 # figure out how to find most viewed parts of a video
 
 
-from Bot import Bot
+from bot import Bot
 
 # video_name = f"{'PowerfulJRE'}-{random.randrange(0, 99999)}"
 

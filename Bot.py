@@ -31,9 +31,12 @@ class Bot:
     error_count = 0
 
     url = ''
+    test_temp = "assets/temp/test_clip.mp4"
     audio_file_name = 'audio.mp3'
     video_file_name = 'video.mp4'
     temp_file_name = 'temp.mp4'
+    start_time = 0
+    end_time = 0
 
     '''  ########## Class Config ########## '''
     MAX_ERROR_COUNT = 5
@@ -47,6 +50,11 @@ class Bot:
         self.init_directories()
         self.initalize()
 
+    def main(self):
+        ''' Main loop for bot '''
+        # self.download_video()
+        self.clip_video()
+
     def initalize(self):
         ''' Initialize method to kickstart the bot '''
         self.error_check()
@@ -56,7 +64,7 @@ class Bot:
             print_step("You must specifiy a youtube link!")
             self.error_count += 1
             self.initalize()
-        self.download_video()
+        self.main()
 
     def download_video(self):
         self.error_check()
@@ -64,8 +72,6 @@ class Bot:
             print_step("Downloading video...", "bold green")
             video_title = YouTube(self.url).title
             print_substep("Video Title: " + video_title, "yellow")
-            # self.video_file_name =  video_title.replace(" ", "") + ".mp4"
-            # self.audio_file_name = video_title.replace(" ", "") + ".mp3"
             youtube_video = YouTube(self.url, on_progress_callback=on_progress).streams.filter(res="1080p").first().download(
                 "assets/videos", filename=self.video_file_name)
             youtube_audio = YouTube(self.url, on_progress_callback=on_progress).streams.filter(
@@ -86,6 +92,11 @@ class Bot:
             print_step("Error downloading videos")
             self.error_count += 1
             self.download_video()
+
+    def clip_video(self):
+        ''' Generates a clip from the start / end time '''
+        clip = VideoFileClip(self.test_temp)
+        print(clip.duration)
 
     def init_directories(self):
         ''' Creates directories for app'''
