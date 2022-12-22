@@ -42,6 +42,9 @@ class Bot:
     start_time = 0
     end_time = 0
 
+    step_style = "bold green"
+    substep_style = "yellow"
+
     '''  ########## Class Config ########## '''
     MAX_ERROR_COUNT = 5
 
@@ -58,8 +61,8 @@ class Bot:
     def main(self):
         ''' Main loop for bot '''
         # self.download_video()
-        self.clip_video()
-        self.extract_audio()
+        # self.clip_video()
+        # self.extract_audio()
         self.extract_text_from_audio()
 
     def initalize(self):
@@ -76,9 +79,9 @@ class Bot:
     def download_video(self):
         self.error_check()
         try:
-            print_step("Downloading video...", "bold green")
+            print_step("Downloading video...", self.step_style)
             video_title = YouTube(self.url).title
-            print_substep("Video Title: " + video_title, "yellow")
+            print_substep("Video Title: " + video_title, self.substep_step)
             youtube_video = YouTube(self.url, on_progress_callback=on_progress).streams.filter(res="1080p").first().download(
                 "assets/videos", filename=self.video_file_name)
             youtube_audio = YouTube(self.url, on_progress_callback=on_progress).streams.filter(
@@ -87,7 +90,7 @@ class Bot:
             audio = AudioFileClip(f"assets/audio/{self.audio_file_name}")
             temp = video.set_audio(audio)
 
-            print_substep("Writing temp video file..", "yellow")
+            print_substep("Writing temp video file..", self.substep_step)
             temp.write_videofile(f"assets/temp/{self.temp_file_name}")
             os.remove(f"assets/videos/{self.video_file_name}")
             os.remove(f"assets/audio/{self.audio_file_name}")
@@ -102,6 +105,7 @@ class Bot:
 
     def clip_video(self):
         ''' Generates a clip from the start / end time '''
+        print_step("Clipping video!", self.step_style)
         temp_clip = VideoFileClip(self.test_temp)
         print(temp_clip.duration)
         start_time = int(temp_clip.duration / 2.5)
@@ -109,25 +113,31 @@ class Bot:
         print_substep("Start time: " + str(start_time))
         print_substep("End time: " + str(end_time))
 
+        print_substep("Writing clip file.", self.substep_style)
         clip = temp_clip.subclip(start_time, end_time)
         clip.write_videofile(f"assets/clips/final-{self.video_file_name}")
         temp_clip.close()
         clip.close()
 
     def extract_audio(self):
+        print_step("Extracting audio!", self.step_style)
         temp_clip = VideoFileClip(f"assets/clips/final-{self.video_file_name}")
         temp_clip.audio.write_audiofile(f"assets/audio/{self.audio_file_name}")
         temp_clip.close()
 
     def extract_text_from_audio(self):
+        print_step("Extracting text from audio!", self.step_style)
         r = sr.Recognizer()
         with sr.AudioFile(f"assets/audio/{self.audio_file_name}") as source:
             audio = r.record(source)  # read the entire audio file
-
-            print("Transcription: " + r.recognize_google(audio))
+            script = r.recognize_google(audio, show_all=True)
+        for transcript in script['alternative']:
+            print(transcript['transcript'])
 
     def init_directories(self):
         ''' Creates directories for app'''
+        print_step("Creating directories if not already created..",
+                   self.step_style)
         Path('./assets/videos').mkdir(parents=True, exist_ok=True)
         Path('./assets/clips').mkdir(parents=True, exist_ok=True)
         Path('./assets/audio').mkdir(parents=True, exist_ok=True)
