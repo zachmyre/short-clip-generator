@@ -7,7 +7,9 @@ from pytube.cli import on_progress
 from pytube import YouTube
 from pytube.cli import on_progress
 from moviepy.editor import *
-from moviepy.video.tools.subtitles import SubtitlesClip
+import speech_recognition as sr
+from os import path
+from pydub import AudioSegment
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
@@ -27,12 +29,14 @@ from rich.text import Text
 '''
 
 
+# https://www.youtube.com/watch?v=7MNv4_rTkfU&ab_channel=PowerfulJRE
+
 class Bot:
     error_count = 0
 
     url = ''
     test_temp = "assets/temp/test_clip.mp4"
-    audio_file_name = 'audio.mp3'
+    audio_file_name = 'audio.wav'
     video_file_name = 'video.mp4'
     temp_file_name = 'temp.mp4'
     start_time = 0
@@ -48,12 +52,15 @@ class Bot:
          ░▀▀▀░░▀░░▀░▀░▀░▀░░▀░░▀▀▀░▀░▀░▀▀▀░░░▀▀░░▀▀▀░░▀░░▀░░▀░░▀░░▀░
          """)
         self.init_directories()
-        self.initalize()
+        #self.initalize()
+        self.main()
 
     def main(self):
         ''' Main loop for bot '''
-        # self.download_video()
-        self.clip_video()
+        #self.download_video()
+        #self.clip_video()
+        #self.extract_audio()
+        self.extract_text_from_audio()
 
     def initalize(self):
         ''' Initialize method to kickstart the bot '''
@@ -95,8 +102,29 @@ class Bot:
 
     def clip_video(self):
         ''' Generates a clip from the start / end time '''
-        clip = VideoFileClip(self.test_temp)
-        print(clip.duration)
+        temp_clip = VideoFileClip(self.test_temp)
+        print(temp_clip.duration)
+        start_time = int(temp_clip.duration / 2.5)
+        end_time = int(start_time + 45)
+        print_substep("Start time: " + str(start_time))
+        print_substep("End time: " + str(end_time))
+
+        clip = temp_clip.subclip(start_time, end_time)
+        clip.write_videofile(f"assets/clips/final-{self.video_file_name}")
+        temp_clip.close()
+        clip.close()
+
+    def extract_audio(self):
+        temp_clip = VideoFileClip(f"assets/clips/final-{self.video_file_name}")
+        temp_clip.audio.write_audiofile(f"assets/audio/{self.audio_file_name}")
+        temp_clip.close()
+    
+    def extract_text_from_audio(self):                                     
+        r = sr.Recognizer()
+        with sr.AudioFile(f"assets/audio/{self.audio_file_name}") as source:
+            audio = r.record(source)  # read the entire audio file                  
+
+            print("Transcription: " + r.recognize_google(audio))
 
     def init_directories(self):
         ''' Creates directories for app'''
