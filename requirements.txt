@@ -3,3 +3,4 @@ pytube==12.1.0
 moviepy==1.0.3
 speechrecognition==3.9.0
 pydub==0.25.1
+customtkinter==5.0.3
