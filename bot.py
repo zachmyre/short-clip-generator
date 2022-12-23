@@ -50,14 +50,14 @@ class Bot:
          """)
         self.init_directories()
         # self.initalize()
-        self.main()
+        # self.main()
 
     def main(self):
         ''' Main loop for bot '''
         # self.download_video()
         # self.clip_video()
         # self.extract_audio()
-        self.extract_text_from_audio()
+        # self.extract_text_from_audio()
 
     def initalize(self):
         ''' Initialize method to kickstart the bot '''
