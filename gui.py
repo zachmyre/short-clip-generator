@@ -49,11 +49,20 @@ class GUI(customtkinter.CTk):
             x=30+self.FRAME_WIDTH/2, y=self.FRAME_HEIGHT/4+3)
 
     def download_youtube_video(self):
+        try:
+            self.youtube_frame_error.destroy()
+        except:
+            print('no error currently')
         print("download youtube video method")
         self.youtube_url = self.youtube_url_textbox.get("0.0", "end").strip()
         print(self.youtube_url)
         self.youtube_id = self.get_youtube_id(self.youtube_url)
         print(str(self.youtube_id))
+        if(self.youtube_id == None):
+            self.youtube_frame_error = customtkinter.CTkLabel(self.youtube_download_frame, text="Error, invalid youtube link!", text_color="red", anchor="w")
+            self.youtube_frame_error.place(x=20, y=self.FRAME_HEIGHT/4-50)
+            print(type(self.youtube_frame_error))
+            return
 
     def get_youtube_id(self, url, ignore_playlist=False):
         # Examples:
