@@ -12,6 +12,6 @@ from youtube_transcript_api import YouTubeTranscriptApi
 
 if __name__ == '__main__':
     # bot = Bot()
-    # gui = GUI()
-    # gui.mainloop()
-    print(YouTubeTranscriptApi.get_transcript("7MNv4_rTkfU"))
+    gui = GUI()
+    gui.mainloop()
+    # print(YouTubeTranscriptApi.get_transcript("7MNv4_rTkfU"))
