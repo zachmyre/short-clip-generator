@@ -2,6 +2,7 @@ import customtkinter
 from bot import Bot
 from urllib.parse import urlparse, parse_qs
 from contextlib import suppress
+from youtube_transcript_api import YouTubeTranscriptApi
 
 # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_appearance_mode("Dark")
@@ -36,12 +37,12 @@ class GUI(customtkinter.CTk):
         # youtube download widgets
         self.youtube_frame_label = customtkinter.CTkLabel(
             self.youtube_download_frame, text="Enter Youtube Link to Download Video", anchor="w")
-        self.youtube_frame_label.place(x=20, y=self.FRAME_HEIGHT/4-25)
+        self.youtube_frame_label.place(x=30, y=self.FRAME_HEIGHT/4-25)
 
         self.youtube_url_textbox = customtkinter.CTkTextbox(
             self.youtube_download_frame, width=self.FRAME_WIDTH/2, height=25)
         self.youtube_url_textbox.place(
-            x=25, y=self.FRAME_HEIGHT/4)
+            x=30, y=self.FRAME_HEIGHT/4)
 
         self.youtube_video_download_btn = customtkinter.CTkButton(
             self.youtube_download_frame, text="Download Video", width=50, height=27, command=self.download_youtube_video)
@@ -51,6 +52,7 @@ class GUI(customtkinter.CTk):
     def download_youtube_video(self):
         try:
             self.youtube_frame_error.destroy()
+            self.youtube_id_label.destroy()
         except:
             print('no error currently')
         print("download youtube video method")
@@ -60,12 +62,24 @@ class GUI(customtkinter.CTk):
         print(str(self.youtube_id))
         if(self.youtube_id == None):
             self.youtube_frame_error = customtkinter.CTkLabel(self.youtube_download_frame, text="Error, invalid youtube link!", text_color="red", anchor="w")
-            self.youtube_frame_error.place(x=20, y=self.FRAME_HEIGHT/4-50)
-            print(type(self.youtube_frame_error))
+            self.youtube_frame_error.place(x=30, y=self.FRAME_HEIGHT/4-50)
             return
+        self.youtube_id_label = customtkinter.CTkLabel(self.youtube_download_frame, text="Youtube ID:" + self.youtube_id, text_color="white", anchor="w")
+        self.youtube_id_label.place(x=30, y=self.FRAME_HEIGHT/4-50)
+        self.get_transcribed_audio()
+
+    def get_transcribed_audio(self):
+        try:
+            print(YouTubeTranscriptApi.get_transcript(self.youtube_id))
+        except Exception as e:
+            self.youtube_frame_error = customtkinter.CTkLabel(self.youtube_download_frame, text="Error, cannot transcribe youtube link!", text_color="red", anchor="w")
+            self.youtube_frame_error.place(x=30, y=self.FRAME_HEIGHT/4-50)
+            print("transcribing error audio")
+            print(e)
 
     def get_youtube_id(self, url, ignore_playlist=False):
         # Examples:
+        # https://www.youtube.com/watch?v=BEWz4SXfyCQ&ab_channel=PowerfulJRE
         # - http://youtu.be/SA2iWivDJiE
         # - http://www.youtube.com/watch?v=_oPAwA_Udwc&feature=feedu
         # - http://www.youtube.com/embed/SA2iWivDJiE
