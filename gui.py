@@ -1,8 +1,12 @@
+import threading
 import customtkinter
 from bot import Bot
 from urllib.parse import urlparse, parse_qs
 from contextlib import suppress
 from youtube_transcript_api import YouTubeTranscriptApi
+
+
+# Implement multithreading for the bot to process while tkinter continues to run
 
 # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_appearance_mode("Dark")
@@ -45,40 +49,47 @@ class GUI(customtkinter.CTk):
             x=30, y=self.FRAME_HEIGHT/4)
 
         self.youtube_video_download_btn = customtkinter.CTkButton(
-            self.youtube_download_frame, text="Download Video", width=50, height=27, command=self.download_youtube_video)
+            self.youtube_download_frame, text="Download Video", width=50, height=27, command=self.download_youtube_video_thread)
         self.youtube_video_download_btn.place(
             x=30+self.FRAME_WIDTH/2, y=self.FRAME_HEIGHT/4+3)
 
+        self.youtube_frame_label = customtkinter.CTkLabel(
+            self.youtube_download_frame, text='', text_color="red", anchor="w")
+        self.youtube_frame_label.place(x=30, y=self.FRAME_HEIGHT/4-50)
+
+    def download_youtube_video_thread(self):
+        threading.Thread(target=self.download_youtube_video).start()
+
     def download_youtube_video(self):
-        try:
-            self.youtube_frame_error.destroy()
-            self.youtube_id_label.destroy()
-        except:
-            print('no error currently')
         print("download youtube video method")
         self.youtube_url = self.youtube_url_textbox.get("0.0", "end").strip()
         print(self.youtube_url)
         self.youtube_id = self.get_youtube_id(self.youtube_url)
         print(str(self.youtube_id))
-        if(self.youtube_id == None):
-            self.youtube_frame_error = customtkinter.CTkLabel(self.youtube_download_frame, text="Error, invalid youtube link!", text_color="red", anchor="w")
-            self.youtube_frame_error.place(x=30, y=self.FRAME_HEIGHT/4-50)
+        if (self.youtube_id == None):
+            self.update_label('youtube', "Error, invalid youtube link!", "red")
             return
-        self.youtube_id_label = customtkinter.CTkLabel(self.youtube_download_frame, text="Youtube ID:" + self.youtube_id, text_color="white", anchor="w")
-        self.youtube_id_label.place(x=30, y=self.FRAME_HEIGHT/4-50)
+        self.update_label('youtube', "Getting audio...", "yellow")
         self.get_transcribed_audio()
+        self.update_label('youtube', "Downloading...", "yellow")
+        self.bot.download_video(self.youtube_url)
+        self.update_label(
+            'youtube', "Download complete! /assets/temp", "yellow")
 
     def get_transcribed_audio(self):
         try:
-            print(YouTubeTranscriptApi.get_transcript(self.youtube_id))
+            self.youtube_transcribed_audio = YouTubeTranscriptApi.get_transcript(
+                self.youtube_id)
+            print(self.youtube_transcribed_audio)
         except Exception as e:
-            self.youtube_frame_error = customtkinter.CTkLabel(self.youtube_download_frame, text="Error, cannot transcribe youtube link!", text_color="red", anchor="w")
-            self.youtube_frame_error.place(x=30, y=self.FRAME_HEIGHT/4-50)
+            self.update_label(
+                'youtube', "Error, cannot transcribe youtube link!", "red")
             print("transcribing error audio")
             print(e)
 
     def get_youtube_id(self, url, ignore_playlist=False):
         # Examples:
+        # https://www.youtube.com/watch?v=yDPQfj4bZY8&ab_channel=NeuralNine
         # https://www.youtube.com/watch?v=BEWz4SXfyCQ&ab_channel=PowerfulJRE
         # - http://youtu.be/SA2iWivDJiE
         # - http://www.youtube.com/watch?v=_oPAwA_Udwc&feature=feedu
@@ -101,3 +112,11 @@ class GUI(customtkinter.CTk):
             if query.path[:3] == '/v/':
                 return query.path.split('/')[2]
         return None
+
+    def update_label(self, type, text, text_color):
+        match type:
+            case 'youtube':
+                self.youtube_frame_label.configure(
+                    require_redraw=True, text=text, text_color=text_color)
+            case _:
+                return

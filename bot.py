@@ -52,31 +52,14 @@ class Bot:
         # self.initalize()
         # self.main()
 
-    def main(self):
-        ''' Main loop for bot '''
-        # self.download_video()
-        # self.clip_video()
-        # self.extract_audio()
-        # self.extract_text_from_audio()
-
-    def initalize(self):
-        ''' Initialize method to kickstart the bot '''
-        self.error_check()
-        self.url = input("Type in a youtube link to generate clips:")
-
-        if not self.validate_text("youtube.com", self.url):
-            console.print_step("You must specifiy a youtube link!")
-            self.error_count += 1
-            self.initalize()
-        self.main()
-
-    def download_video(self):
+    def download_video(self, url):
+        self.url = url
         self.error_check()
         try:
-            console.print_step("Downloading video...", self.step_style)
+            console.print_step("Downloading video...")
             video_title = YouTube(self.url).title
             console.print_substep(
-                "Video Title: " + video_title, self.substep_step)
+                "Video Title: " + video_title)
             youtube_video = YouTube(self.url, on_progress_callback=on_progress).streams.filter(res="1080p").first().download(
                 "assets/videos", filename=self.video_file_name)
             youtube_audio = YouTube(self.url, on_progress_callback=on_progress).streams.filter(
@@ -86,7 +69,7 @@ class Bot:
             temp = video.set_audio(audio)
 
             console.print_substep(
-                "Writing temp video file..", self.substep_step)
+                "Writing temp video file..")
             temp.write_videofile(f"assets/temp/{self.temp_file_name}")
             os.remove(f"assets/videos/{self.video_file_name}")
             os.remove(f"assets/audio/{self.audio_file_name}")
@@ -97,11 +80,11 @@ class Bot:
             print(e)
             console.print_step("Error downloading videos")
             self.error_count += 1
-            self.download_video()
+            self.download_video(self.url)
 
     def clip_video(self):
         ''' Generates a clip from the start / end time '''
-        console.print_step("Clipping video!", self.step_style)
+        console.print_step("Clipping video!")
         temp_clip = VideoFileClip(self.test_temp)
         print(temp_clip.duration)
         start_time = int(temp_clip.duration / 2.5)
@@ -109,20 +92,20 @@ class Bot:
         console.print_substep("Start time: " + str(start_time))
         console.print_substep("End time: " + str(end_time))
 
-        console.print_substep("Writing clip file.", self.substep_style)
+        console.print_substep("Writing clip file.")
         clip = temp_clip.subclip(start_time, end_time)
         clip.write_videofile(f"assets/clips/final-{self.video_file_name}")
         temp_clip.close()
         clip.close()
 
     def extract_audio(self):
-        console.print_step("Extracting audio!", self.step_style)
+        console.print_step("Extracting audio!")
         temp_clip = VideoFileClip(f"assets/clips/final-{self.video_file_name}")
         temp_clip.audio.write_audiofile(f"assets/audio/{self.audio_file_name}")
         temp_clip.close()
 
     def extract_text_from_audio(self):
-        console.print_step("Extracting text from audio!", self.step_style)
+        console.print_step("Extracting text from audio!")
         r = sr.Recognizer()
         with sr.AudioFile(f"assets/audio/{self.audio_file_name}") as source:
             audio = r.record(source)  # read the entire audio file
@@ -132,8 +115,7 @@ class Bot:
 
     def init_directories(self):
         ''' Creates directories for app'''
-        console.print_step("Creating directories if not already created..",
-                           self.step_style)
+        console.print_step("Creating directories if not already created..")
         Path('./assets/videos').mkdir(parents=True, exist_ok=True)
         Path('./assets/clips').mkdir(parents=True, exist_ok=True)
         Path('./assets/audio').mkdir(parents=True, exist_ok=True)
