@@ -1,5 +1,9 @@
 import threading
+import datetime
 import customtkinter
+import tkinter as tk
+from tkinter import filedialog
+from tkVideoPlayer import TkinterVideo
 from bot import Bot
 from urllib.parse import urlparse, parse_qs
 from contextlib import suppress
@@ -32,6 +36,46 @@ class GUI(customtkinter.CTk):
         self.video_frame = customtkinter.CTkFrame(
             self, width=self.FRAME_WIDTH, height=self.FRAME_HEIGHT, fg_color="red")
         self.video_frame.place(x=self.WIDTH-self.FRAME_WIDTH)
+
+        # video player
+        self.video_player = TkinterVideo(scaled=True, master=self.video_frame)
+        self.video_player.place(x=self.WIDTH-self.FRAME_WIDTH)
+
+        # video player gui
+        self.load_btn = tk.Button(
+            self.video_frame, text="Load", command=self.load_video)
+        self.load_btn.pack()
+
+        self.play_pause_btn = tk.Button(
+            self.video_frame, text="Play", command=self.play_pause)
+        self.play_pause_btn.pack()
+
+        self.skip_plus_5sec = tk.Button(
+            self.video_frame, text="Skip -5 sec", command=lambda: self.skip(-5))
+        self.skip_plus_5sec.pack(side="left")
+
+        self.start_time = tk.Label(
+            self.video_frame, text=str(datetime.timedelta(seconds=0)))
+        self.start_time.pack(side="left")
+
+        self.progress_value = tk.IntVar(self.video_frame)
+
+        self.progress_slider = tk.Scale(self.video_frame, variable=self.progress_value,
+                                        from_=0, to=0, orient="horizontal", command=self.seek)
+        # progress_slider.bind("<ButtonRelease-1>", seek)
+        self.progress_slider.pack(side="left", fill="x", expand=True)
+
+        self.end_time = tk.Label(
+            self.video_frame, text=str(datetime.timedelta(seconds=0)))
+        self.end_time.pack(side="left")
+
+        self.video_player.bind("<<Duration>>", self.update_duration)
+        self.video_player.bind("<<SecondChanged>>", self.update_scale)
+        self.video_player.bind("<<Ended>>", self.video_ended)
+
+        self.skip_plus_5sec = tk.Button(
+            self.video_frame, text="Skip +5 sec", command=lambda: self.skip(5))
+        self.skip_plus_5sec.pack(side="left")
 
         # youtube download frame
         self.youtube_download_frame = customtkinter.CTkFrame(
@@ -112,6 +156,52 @@ class GUI(customtkinter.CTk):
             if query.path[:3] == '/v/':
                 return query.path.split('/')[2]
         return None
+
+    def update_duration(self, event):
+        """ updates the duration after finding the duration """
+        self.duration = self.video_player.video_info()["duration"]
+        self.end_time["text"] = str(datetime.timedelta(seconds=self.duration))
+        self.progress_slider["to"] = self.duration
+
+    def update_scale(self, event):
+        """ updates the scale value """
+        self.progress_value.set(self.video_player.current_duration())
+
+    def load_video(self):
+        """ loads the video """
+        self.file_path = filedialog.askopenfilename()
+
+        if self.file_path:
+            self.video_player.load(self.file_path)
+
+            self.progress_slider.config(to=0, from_=0)
+            self.play_pause_btn["text"] = "Play"
+            self.progress_value.set(0)
+
+    def seek(self, value):
+        """ used to seek a specific timeframe """
+        self.video_player.seek(int(value))
+
+    def skip(self, value: int):
+        """ skip seconds """
+        self.video_player.seek(int(self.progress_slider.get())+value)
+        self.progress_value.set(self.progress_slider.get() + value)
+
+    def play_pause(self):
+        """ pauses and plays """
+        if self.video_player.is_paused():
+            self.video_player.play()
+            self.play_pause_btn["text"] = "Pause"
+
+        else:
+            self.video_player.pause()
+            self.play_pause_btn["text"] = "Play"
+
+    def video_ended(self, event):
+        """ handle video ended """
+        self.progress_slider.set(self.progress_slider["to"])
+        self.play_pause_btn["text"] = "Play"
+        self.progress_slider.set(0)
 
     def update_label(self, type, text, text_color):
         match type:

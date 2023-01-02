@@ -29,19 +29,19 @@ from tkinter import filedialog
 from tkVideoPlayer import TkinterVideo
 
 
-def update_duration(event):
+def update_duration(self, event):
     """ updates the duration after finding the duration """
     duration = vid_player.video_info()["duration"]
     end_time["text"] = str(datetime.timedelta(seconds=duration))
     progress_slider["to"] = duration
 
 
-def update_scale(event):
+def update_scale(self, event):
     """ updates the scale value """
     progress_value.set(vid_player.current_duration())
 
 
-def load_video():
+def load_video(self):
     """ loads the video """
     file_path = filedialog.askopenfilename()
 
@@ -53,18 +53,18 @@ def load_video():
         progress_value.set(0)
 
 
-def seek(value):
+def seek(self, value):
     """ used to seek a specific timeframe """
     vid_player.seek(int(value))
 
 
-def skip(value: int):
+def skip(self, value: int):
     """ skip seconds """
     vid_player.seek(int(progress_slider.get())+value)
     progress_value.set(progress_slider.get() + value)
 
 
-def play_pause():
+def play_pause(self):
     """ pauses and plays """
     if vid_player.is_paused():
         vid_player.play()
@@ -75,7 +75,7 @@ def play_pause():
         play_pause_btn["text"] = "Play"
 
 
-def video_ended(event):
+def video_ended(self, event):
     """ handle video ended """
     progress_slider.set(progress_slider["to"])
     play_pause_btn["text"] = "Play"
