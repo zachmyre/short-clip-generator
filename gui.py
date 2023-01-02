@@ -34,48 +34,49 @@ class GUI(customtkinter.CTk):
 
         # frame for video
         self.video_frame = customtkinter.CTkFrame(
-            self, width=self.FRAME_WIDTH, height=self.FRAME_HEIGHT, fg_color="red")
-        self.video_frame.place(x=self.WIDTH-self.FRAME_WIDTH)
+            self, width=500, height=600, fg_color="green")
+        self.video_frame.pack(padx=10, pady=20, side="right")
+        self.video_frame.pack_propagate(0)
 
         # video player
-        self.video_player = TkinterVideo(scaled=True, master=self.video_frame)
-        self.video_player.place(x=self.WIDTH-self.FRAME_WIDTH)
+        self.video_player = TkinterVideo(master=self.video_frame, scaled=True)
+        self.video_player.pack(expand=True, fill="both")
 
         # video player gui
-        self.load_btn = tk.Button(
+        self.load_btn = customtkinter.CTkButton(
             self.video_frame, text="Load", command=self.load_video)
-        self.load_btn.pack()
+        self.load_btn.place(x=250, y=10)
 
-        self.play_pause_btn = tk.Button(
+        self.play_pause_btn = customtkinter.CTkButton(
             self.video_frame, text="Play", command=self.play_pause)
-        self.play_pause_btn.pack()
+        self.play_pause_btn.place(x=10, y=40)
 
-        self.skip_plus_5sec = tk.Button(
+        self.skip_plus_5sec = customtkinter.CTkButton(
             self.video_frame, text="Skip -5 sec", command=lambda: self.skip(-5))
-        self.skip_plus_5sec.pack(side="left")
+        self.skip_plus_5sec.place(x=50, y=500)
 
-        self.start_time = tk.Label(
+        self.start_time = customtkinter.CTkLabel(
             self.video_frame, text=str(datetime.timedelta(seconds=0)))
-        self.start_time.pack(side="left")
+        self.start_time.place(x=250, y=500)
 
         self.progress_value = tk.IntVar(self.video_frame)
 
         self.progress_slider = tk.Scale(self.video_frame, variable=self.progress_value,
                                         from_=0, to=0, orient="horizontal", command=self.seek)
         # progress_slider.bind("<ButtonRelease-1>", seek)
-        self.progress_slider.pack(side="left", fill="x", expand=True)
+        self.progress_slider.place(x=300, y=500)
 
-        self.end_time = tk.Label(
+        self.end_time = customtkinter.CTkLabel(
             self.video_frame, text=str(datetime.timedelta(seconds=0)))
-        self.end_time.pack(side="left")
+        self.end_time.place(x=300, y=480)
 
         self.video_player.bind("<<Duration>>", self.update_duration)
         self.video_player.bind("<<SecondChanged>>", self.update_scale)
         self.video_player.bind("<<Ended>>", self.video_ended)
 
-        self.skip_plus_5sec = tk.Button(
+        self.skip_plus_5sec = customtkinter.CTkButton(
             self.video_frame, text="Skip +5 sec", command=lambda: self.skip(5))
-        self.skip_plus_5sec.pack(side="left")
+        self.skip_plus_5sec.place(x=100, y=500)
 
         # youtube download frame
         self.youtube_download_frame = customtkinter.CTkFrame(
