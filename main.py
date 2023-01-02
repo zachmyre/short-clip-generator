@@ -1,5 +1,6 @@
 from bot import Bot
 from gui import GUI
+from youtube_transcript_api import YouTubeTranscriptApi
 
 
 # Create gui that can download a video from youtube then display it in the GUI
